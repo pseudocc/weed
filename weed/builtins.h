@@ -123,6 +123,10 @@ usize __builtins_weeds_len(usize elem_size, const void* ptr, const void* sentine
 typedef WEEDS_MUT(void) opaque_mut;
 typedef WEEDS(void) opaque;
 
+typedef WEEDS_MUT(char) string_mut;
+typedef WEEDS(char) string;
+typedef const char* string0;
+
 #define primitive_eql_fn(_T) \
 	(_T a, _T b) { \
 		return a == b; \
