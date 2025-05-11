@@ -104,11 +104,29 @@ typedef double f64;
 		.len = __weeds.len \
 	}
 
-#define weeds_opaque(__weeds) \
-	{ \
+#define to_opaque(__weeds) \
+	(opaque){ \
 		.ptr = (void*)(__weeds.ptr), \
 		.len = __weeds.len * sizeof(*__weeds.ptr) \
 	}
+
+#define to_opaque_mut(__weeds) \
+	(opaque_mut){ \
+		.ptr = (void*)(__weeds.ptr), \
+		.len = __weeds.len * sizeof(*__weeds.ptr) \
+	}
+
+#define as_opaque(__value) \
+	(opaque)({ \
+		.ptr = (const char*)&(__value), \
+		.len = sizeof(__value), \
+	})
+
+#define as_opaque_mut(__value) \
+	(opaque_mut)({ \
+		.ptr = (const char*)&(__value), \
+		.len = sizeof(__value), \
+	})
 
 #define weeds_eql(__a, __b) \
 	__builtins_weeds_eql( \
@@ -122,6 +140,10 @@ usize __builtins_weeds_len(usize elem_size, const void* ptr, const void* sentine
 
 typedef WEEDS_MUT(void) opaque_mut;
 typedef WEEDS(void) opaque;
+
+usize __builtins_memcpy(opaque_mut dest, opaque src);
+#define memcpy(__dest, __src) \
+	__builtins_memcpy(to_opaque_mut(__dest), to_opaque(__src))
 
 typedef WEEDS_MUT(char) string_mut;
 typedef WEEDS(char) string;
