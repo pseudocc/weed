@@ -75,6 +75,15 @@ typedef double f64;
 		) \
 	}
 
+#define weeds_string(__str) \
+	{ \
+		.ptr = __str, \
+		.len = sizeof(__str) - 1 \
+	}
+
+#define opaque_string(__str) \
+	(opaque)weeds_string(__str)
+
 #define weeds_sub(__weeds, __start, ...) \
 	__weeds_sub_impl(__weeds, __start, __VA_ARGS__, (usize)-1)
 
@@ -117,16 +126,16 @@ typedef double f64;
 	}
 
 #define as_opaque(__value) \
-	(opaque)({ \
-		.ptr = (const char*)&(__value), \
+	(opaque){ \
+		.ptr = &(__value), \
 		.len = sizeof(__value), \
-	})
+	}
 
 #define as_opaque_mut(__value) \
-	(opaque_mut)({ \
-		.ptr = (const char*)&(__value), \
+	(opaque_mut){ \
+		.ptr = (void*)&(__value), \
 		.len = sizeof(__value), \
-	})
+	}
 
 #define weeds_eql(__a, __b) \
 	__builtins_weeds_eql( \

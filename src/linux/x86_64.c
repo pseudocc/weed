@@ -123,9 +123,6 @@ void syscall_exit(i32 status) {
 
 #ifdef WEED_DEV
 
-#define opaque_string(__str) \
-	(opaque)weeds_ptr(char, __str, 0)
-
 void weed() {
 	i32 status = 0;
 	usize fd;
