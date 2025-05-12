@@ -16,5 +16,8 @@ OBJ = $(SRC:.c=.o)
 test/linux_x86_64: src/linux/x86_64.c src/builtins.o
 	$(CC) $(CFLAGS) $(CFLAGS_TEST) -fno-stack-protector $^ -o $@
 
+test/fs: src/fs.c src/linux/x86_64.o src/builtins.o
+	$(CC) $(CFLAGS) $(CFLAGS_TEST) -fno-stack-protector $^ -o $@
+
 clean:
 	rm -f $(OBJ) test/*
