@@ -35,14 +35,10 @@ end:
 	return i;
 }
 
-usize __builtins_memcpy(opaque_mut dest, opaque src) {
+void __builtins_memcpy(opaque_mut dest, opaque src) {
 	usize i = 0;
-	register u8* d = dest.ptr;
-	register const u8* s = src.ptr;
-	if (dest.len < src.len) {
-		i = (usize)-1;
-		goto end;
-	}
+	register u8* restrict d = dest.ptr;
+	register const u8* restrict s = src.ptr;
 loop:
 	if (i >= src.len)
 		goto end;
@@ -50,5 +46,5 @@ loop:
 	*d++ = *s++;
 	goto loop;
 end:
-	return i;
+	return;
 }

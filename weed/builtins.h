@@ -165,7 +165,7 @@ usize __builtins_weeds_len(usize elem_size, const void* ptr, const void* sentine
 typedef WEEDS_MUT(void) opaque_mut;
 typedef WEEDS(void) opaque;
 
-usize __builtins_memcpy(opaque_mut dest, opaque src);
+void __builtins_memcpy(opaque_mut dest, opaque src);
 #define memcpy(__dest, __src) \
 	__builtins_memcpy(to(opaque_mut, __dest), to(opaque, __src))
 
