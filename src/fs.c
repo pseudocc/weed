@@ -49,7 +49,7 @@ reader_t file_reader(const file_t* file) {
 #include <weed/stdio.h>
 
 void weed() {
-	write_all(stdout, opaque_string("bye!"));
+	write_all(stdout, as(opaque, "bye!"));
 	write(char, stdout, '\n');
 	syscall_exit(0);
 }

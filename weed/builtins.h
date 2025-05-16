@@ -50,19 +50,25 @@ typedef double f64;
 	usize len; \
 }
 
-#define arrlen(__T) \
-	(sizeof(__T) / sizeof(__T[0]))
+#define static_if(__cond, __then, __else) \
+	_Generic(&(char[1+!!(__cond)]) {0}, \
+		char (*)[2]: (__then), \
+		default: (__else) \
+	)
+
+#define array_len(__value) \
+	(sizeof(__value) / sizeof(__value[0]))
+
+#define arrayify(__value) \
+	((typeof(__value)[1]) { __value })
+
+#define is_string(__value) \
+	_Generic(&(__value), char (*)[]: true, default: false)
 
 #define weeds_stack(__T, __len) \
 	{ \
-		.ptr = &((__T[__len]) { 0 })[0], \
+		.ptr = (__T[__len]) { 0 }, \
 		.len = __len \
-	}
-
-#define weeds_arr(__T, __arr) \
-	{ \
-		.ptr = (__T*)(__arr), \
-		.len = arrlen(__arr) \
 	}
 
 #define weeds_ptr(__T, __ptr, __sentinel) \
@@ -70,19 +76,10 @@ typedef double f64;
 		.ptr = (__T*)(__ptr), \
 		.len = __builtins_weeds_len( \
 			sizeof(__T), \
-			(void*)(__ptr), \
-			(void*)&((__T[1]) { __sentinel })[0] \
+			__ptr, \
+			(__T[1]) { __sentinel } \
 		) \
 	}
-
-#define weeds_string(__str) \
-	{ \
-		.ptr = __str, \
-		.len = sizeof(__str) - 1 \
-	}
-
-#define opaque_string(__str) \
-	(opaque)weeds_string(__str)
 
 #define weeds_sub(__weeds, __start, ...) \
 	__weeds_sub_impl(__weeds, __start, __VA_ARGS__, (usize)-1)
@@ -93,49 +90,67 @@ typedef double f64;
 		.len = (__end > __weeds.len ? __weeds.len : __end) - __start \
 	}
 
+#define weeds_size(__weeds) \
+	(usize)(__weeds.len * sizeof(*__weeds.ptr)) \
+
+#define weeds_type(__weeds) \
+	typeof(*((typeof(__weeds)*)0)->ptr)
+
 #define weeds_len(__T, __ptr, __sentinel) \
-	__builtins_weeds_len( \
-		sizeof(__T), \
-		(void*)(__ptr), \
-		(void*)(&(__T[1] { __sentinel })[0]) \
-	)
+	__builtins_weeds_len(sizeof(__T), __ptr, __sentinel)
 
 #define weeds_at(__weeds, __index) \
 	__index < __weeds.len \
 		? &__weeds.ptr[__index] \
 		: (typeof(__weeds.ptr))0
 
-#define unconst(__t) (typeof(({__auto_type __s = *(__t); &__s;})))(__t)
+#define let __auto_type
 
-#define weeds_shallow(__weeds) \
-	{ \
-		.ptr = unconst(__weeds.ptr), \
-		.len = __weeds.len \
-	}
+#define unconst(__t) \
+	(typeof(({let __s = *(__t); &__s;})))(__t)
 
-#define to_opaque(__weeds) \
-	(opaque){ \
-		.ptr = (void*)(__weeds.ptr), \
-		.len = __weeds.len * sizeof(*__weeds.ptr) \
-	}
+#define as(__T, ...) \
+	__as_impl(__T, __VA_ARGS__, 1, 0)
 
-#define to_opaque_mut(__weeds) \
-	(opaque_mut){ \
-		.ptr = (void*)(__weeds.ptr), \
-		.len = __weeds.len * sizeof(*__weeds.ptr) \
-	}
+#define __as_impl(__T, __value, __sentinel, __has_sentinel, ...) \
+	_Generic(*(__T*)0, \
+		opaque: (opaque){ \
+			.ptr = &(__value), \
+			.len = sizeof(__value) - is_string(__value) \
+		}, \
+		opaque_mut: (opaque_mut){ \
+			.ptr = &(__value), \
+			.len = sizeof(__value) - is_string(__value) \
+		}, \
+		default: (__T){ \
+			.ptr = (void*)(usize)__value, \
+			.len = static_if(__has_sentinel, \
+				weeds_len(weeds_type(__T), __value, arrayify(__sentinel)), \
+				array_len(__value) - is_string(__value) \
+			) \
+		} \
+	)
 
-#define as_opaque(__value) \
-	(opaque){ \
-		.ptr = &(__value), \
-		.len = sizeof(__value), \
-	}
-
-#define as_opaque_mut(__value) \
-	(opaque_mut){ \
-		.ptr = (void*)&(__value), \
-		.len = sizeof(__value), \
-	}
+/**
+ * convert weeds(A) to weeds(B)
+ */
+#define to(__T, __weeds) \
+	_Generic(*(__T*)0, \
+		opaque: (opaque){ \
+			.ptr = (void*)(__weeds.ptr), \
+			.len = weeds_size(__weeds) \
+		}, \
+		opaque_mut: (opaque_mut){ \
+			.ptr = (void*)(__weeds.ptr), \
+			.len = weeds_size(__weeds) \
+		}, \
+		default: (__T){ \
+			.ptr = unconst(__weeds.ptr), \
+			.len = __weeds.len \
+				* sizeof(weeds_type(__weeds)) \
+				/ sizeof(weeds_type(__T)) \
+		} \
+	)
 
 #define weeds_eql(__a, __b) \
 	__builtins_weeds_eql( \
@@ -152,7 +167,7 @@ typedef WEEDS(void) opaque;
 
 usize __builtins_memcpy(opaque_mut dest, opaque src);
 #define memcpy(__dest, __src) \
-	__builtins_memcpy(to_opaque_mut(__dest), to_opaque(__src))
+	__builtins_memcpy(to(opaque_mut, __dest), to(opaque, __src))
 
 typedef WEEDS_MUT(char) string_mut;
 typedef WEEDS(char) string;

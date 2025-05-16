@@ -127,39 +127,39 @@ void weed() {
 	i32 status = 0;
 	usize fd;
 
-	syscall_write(1, opaque_string("hello weed\n"));
+	syscall_write(1, as(opaque, "hello weed\n"));
 	fd = syscall_open("/dev/zero", 0, 0);
 
 	if (fd == (usize)-1) {
-		syscall_write(2, opaque_string("error opening /dev/zero\n"));
+		syscall_write(2, as(opaque, "error opening /dev/zero\n"));
 		status = 1;
 		goto early_exit;
 	}
 
 	weeds(char) stream = weeds_stack(char, 128);
-	syscall_write(1, (opaque)weeds_ptr(char, "opened /dev/zero\n", 0));
+	syscall_write(1, as(opaque, "opened /dev/zero\n"));
 
-	if (syscall_read(fd, (opaque_mut)weeds_shallow(stream)) == (usize)-1) {
-		syscall_write(2, (opaque)weeds_ptr(char, "error reading /dev/zero\n", 0));
+	if (syscall_read(fd, to(opaque_mut, stream)) == (usize)-1) {
+		syscall_write(2, as(opaque, "error reading /dev/zero\n"));
 		syscall_exit(1);
 	}
 
-	syscall_write(1, (opaque)weeds_ptr(char, "read /dev/zero\n", 0));
+	syscall_write(1, as(opaque, "read /dev/zero\n"));
 	for (usize i = 0; i < stream.len; i++) {
 		if (stream.ptr[i] != 0) {
-			syscall_write(2, (opaque)weeds_ptr(char, "error\n", 0));
+			syscall_write(2, as(opaque, "error: read /dev/zero\n"));
 			status = 1;
 			goto exit;
 		}
 	}
-	syscall_write(1, (opaque)weeds_ptr(char, "read /dev/zero ok, everything is zero\n", 0));
+	syscall_write(1, as(opaque, "read /dev/zero ok, everything is zero\n"));
 
 exit:
 	if (syscall_close(fd) == (usize)-1) {
-		syscall_write(2, (opaque)weeds_ptr(char, "error closing /dev/zero\n", 0));
+		syscall_write(2, as(opaque, "error closing /dev/zero\n"));
 		status = 1;
 	} else {
-		syscall_write(1, (opaque)weeds_ptr(char, "closed /dev/zero\n", 0));
+		syscall_write(1, as(opaque, "closed /dev/zero\n"));
 	}
 early_exit:
 	syscall_exit(status);

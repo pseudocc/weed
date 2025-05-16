@@ -30,7 +30,7 @@ static inline usize write_all(writer_t writer, opaque data) {
 #define write(__T, __writer, __value) \
 	(usize)({ \
 		__T value = __value; \
-		opaque payload = as_opaque(value); \
+		opaque payload = as(opaque, arrayify(value)); \
 		write_all(__writer, payload); \
 	})
 
@@ -40,8 +40,9 @@ static inline usize read_all(reader_t reader, opaque_mut buffer) {
 
 #define read(__T, __reader) \
 	(__T)({ \
-		__T value; \
-		read_all(__reader, as_opaque_mut(value)); \
+		__T value = {0}; \
+		opaque_mut payload = as(opaque_mut, arrayify(value)); \
+		read_all(__reader, payload); \
 		value; \
 	})
 
