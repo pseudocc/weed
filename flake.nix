@@ -25,6 +25,7 @@
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             gcc
+            gdb
             gnumake
           ];
           shellHook = ''

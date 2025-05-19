@@ -1,0 +1,90 @@
+/**
+ * vim: ts=4:noet
+**/
+
+#include <weed/stdio.h>
+
+#ifdef __linux__
+#include <weed/linux/syscall.h>
+
+file_t file_open(string path, file_open_t options) {
+	char pathbuf[PATH_MAX];
+	weeds(char) path0 = weeds_stack(char, PATH_MAX);
+	memcpy(path0, path);
+	return (file_t)syscall_open(path0.ptr, options.flags, options.mode);
+}
+
+usize file_close(file_t file) {
+	return syscall_close((usize)file);
+}
+
+static usize __file_write(void* ctx, opaque data) {
+	const file_t file = *(file_t*)ctx;
+	return syscall_write((usize)file, data);
+}
+
+static usize __file_read(void* ctx, opaque_mut buffer) {
+	const file_t file = *(file_t*)ctx;
+	return syscall_read((usize)file, buffer);
+}
+
+const file_t file_stdin = 0;
+const file_t file_stdout = 1;
+const file_t file_stderr = 2;
+
+const reader_t stdin = {
+	.ctx = (void*)&file_stdin,
+	.fn = __file_read
+};
+
+const writer_t stdout = {
+	.ctx = (void*)&file_stdout,
+	.fn = __file_write,
+};
+
+const writer_t stderr = {
+	.ctx = (void*)&file_stderr,
+	.fn = __file_write,
+};
+
+#endif
+
+usize write_all(writer_t writer, opaque data) {
+	return writer.fn(writer.ctx, data);
+}
+
+writer_t file_writer(const file_t* file) {
+	return (writer_t){
+		.ctx = unconst(file),
+		.fn = __file_write,
+	};
+}
+
+reader_t file_reader(const file_t* file) {
+	return (reader_t){
+		.ctx = unconst(file),
+		.fn = __file_read,
+	};
+}
+
+#ifdef WEED_DEV
+
+void weed() {
+	usize written = 0;
+	written += write_all(stdout, as(opaque, "hi!\n"));
+	written += write_all(stdout, as(opaque, "hey!"));
+	let cnl = '\n';
+	var nl = (opaque){ &cnl, 1 };
+	if (written) {
+		// write_all(stdout, nl);
+		// syscall_write(1, nl);
+		nl.len = written / 2;
+	}
+	if (nl.len) {
+		syscall_write(1, nl);
+		write_all(stdout, as(opaque, "bye!\n"));
+	}
+	syscall_exit(0);
+}
+
+#endif

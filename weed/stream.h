@@ -23,9 +23,7 @@ typedef struct {
 
 // TODO: error union type for error handling
 
-static inline usize write_all(writer_t writer, opaque data) {
-	return writer.fn(writer.ctx, data);
-}
+usize write_all(writer_t writer, opaque data);
 
 #define write(__T, __writer, __value) \
 	(usize)({ \

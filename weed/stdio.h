@@ -9,24 +9,13 @@
 
 #ifdef __linux__
 
-const file_t file_stdin = 0;
-const file_t file_stdout = 1;
-const file_t file_stderr = 2;
+extern const file_t file_stdin;
+extern const file_t file_stdout;
+extern const file_t file_stderr;
 
-const reader_t stdin = {
-	.ctx = (void*)(usize)&file_stdin,
-	.fn = __file_read
-};
-
-const writer_t stdout = {
-	.ctx = (void*)(usize)&file_stdout,
-	.fn = __file_write,
-};
-
-const writer_t stderr = {
-	.ctx = (void*)(usize)&file_stderr,
-	.fn = __file_write,
-};
+extern const reader_t stdin;
+extern const writer_t stdout;
+extern const writer_t stderr;
 
 #endif // __linux__
 

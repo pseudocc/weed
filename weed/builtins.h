@@ -100,33 +100,43 @@ typedef double f64;
 	__builtins_weeds_len(sizeof(__T), __ptr, __sentinel)
 
 #define weeds_at(__weeds, __index) \
-	__index < __weeds.len \
-		? &__weeds.ptr[__index] \
-		: (typeof(__weeds.ptr))0
+	({ \
+		typeof(__weeds.ptr) ptr = null; \
+		if (__index < __weeds.len) \
+			ptr = &__weeds.ptr[__index]; \
+		ptr; \
+	})
 
-#define let __auto_type
+#define var __auto_type
+#define let const __auto_type
 
 #define unconst(__t) \
-	(typeof(({let __s = *(__t); &__s;})))(__t)
+	(typeof(({var __s = *(__t); &__s;})))(__t)
 
 #define as(__T, ...) \
 	__as_impl(__T, __VA_ARGS__, 1, 0)
+
+#define __as_len(__len, __value) \
+	static_if(__len == 1, \
+		1, \
+		__len - is_string(__value) \
+	)
 
 #define __as_impl(__T, __value, __sentinel, __has_sentinel, ...) \
 	_Generic(*(__T*)0, \
 		opaque: (opaque){ \
 			.ptr = &(__value), \
-			.len = sizeof(__value) - is_string(__value) \
+			.len = __as_len(sizeof(__value), __value) \
 		}, \
 		opaque_mut: (opaque_mut){ \
 			.ptr = &(__value), \
-			.len = sizeof(__value) - is_string(__value) \
+			.len = __as_len(sizeof(__value), __value) \
 		}, \
 		default: (__T){ \
 			.ptr = (void*)(usize)__value, \
 			.len = static_if(__has_sentinel, \
 				weeds_len(weeds_type(__T), __value, arrayify(__sentinel)), \
-				array_len(__value) - is_string(__value) \
+				__as_len(array_len(__value), __value) \
 			) \
 		} \
 	)

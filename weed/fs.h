@@ -26,7 +26,4 @@ usize file_close(file_t file);
 writer_t file_writer(const file_t* file);
 reader_t file_reader(const file_t* file);
 
-usize __file_write(void* ctx, opaque data);
-usize __file_read(void* ctx, opaque_mut buffer);
-
 #endif // WEED_FILE_SYSTEM_H
