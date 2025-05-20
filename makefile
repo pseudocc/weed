@@ -22,5 +22,11 @@ test/linux_x86_64: src/linux/x86_64.c src/builtins.o
 test/stdio: src/stdio.c src/linux/x86_64.o src/builtins.o
 	$(CC) $(CFLAGS_TEST) $^ -o $@
 
+test/playground: playground.c $(OBJ)
+	$(CC) $(CFLAGS_TEST) $^ -o $@
+
+playground: test/playground
+	./$^
+
 clean:
 	rm -f $(OBJ) test/*
