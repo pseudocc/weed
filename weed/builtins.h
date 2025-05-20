@@ -74,7 +74,7 @@ typedef double f64;
 #define weeds_ptr(__T, __ptr, __sentinel) \
 	{ \
 		.ptr = (__T*)(__ptr), \
-		.len = __builtins_weeds_len( \
+		.len = __weed_weeds_len( \
 			sizeof(__T), \
 			__ptr, \
 			(__T[1]) { __sentinel } \
@@ -97,7 +97,7 @@ typedef double f64;
 	typeof(*((typeof(__weeds)*)0)->ptr)
 
 #define weeds_len(__T, __ptr, __sentinel) \
-	__builtins_weeds_len(sizeof(__T), __ptr, __sentinel)
+	__weed_weeds_len(sizeof(__T), __ptr, __sentinel)
 
 #define weeds_at(__weeds, __index) \
 	({ \
@@ -163,21 +163,21 @@ typedef double f64;
 	)
 
 #define weeds_eql(__a, __b) \
-	__builtins_weeds_eql( \
+	__weed_weeds_eql( \
 		(usize)__a.ptr, __a.len * sizeof(*__a.ptr), \
 		(usize)__b.ptr, __b.len * sizeof(*__b.ptr) \
 	)
 
-bool __builtins_weeds_eql(usize aptr, usize alen, usize bptr, usize blen);
+bool __weed_weeds_eql(usize aptr, usize alen, usize bptr, usize blen);
 
-usize __builtins_weeds_len(usize elem_size, const void* ptr, const void* sentinel);
+usize __weed_weeds_len(usize elem_size, const void* ptr, const void* sentinel);
 
 typedef WEEDS_MUT(void) opaque_mut;
 typedef WEEDS(void) opaque;
 
-void __builtins_memcpy(opaque_mut dest, opaque src);
+void __weed_memcpy(opaque_mut dest, opaque src);
 #define memcpy(__dest, __src) \
-	__builtins_memcpy(to(opaque_mut, __dest), to(opaque, __src))
+	__weed_memcpy(to(opaque_mut, __dest), to(opaque, __src))
 
 typedef WEEDS_MUT(char) string_mut;
 typedef WEEDS(char) string;
