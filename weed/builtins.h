@@ -59,6 +59,9 @@ typedef double f64;
 #define array_len(__value) \
 	(sizeof(__value) / sizeof(__value[0]))
 
+#define align_to(__value, __align) \
+	(__value + (__align - 1)) & ~(__align - 1)
+
 #define arrayify(__value) \
 	((typeof(__value)[1]) { __value })
 
@@ -182,27 +185,5 @@ void __weed_memcpy(opaque_mut dest, opaque src);
 typedef WEEDS_MUT(char) string_mut;
 typedef WEEDS(char) string;
 typedef const char* string0;
-
-#define primitive_eql_fn(_T) \
-	(_T a, _T b) { \
-		return a == b; \
-	}
-#define typedef_eql_fn(_T, _tyname) \
-	typedef bool (*_tyname)(_T, _T)
-
-static inline bool bool_eql primitive_eql_fn(bool);
-static inline bool usize_eql primitive_eql_fn(usize);
-static inline bool u8_eql primitive_eql_fn(u8);
-static inline bool u16_eql primitive_eql_fn(u16);
-static inline bool u32_eql primitive_eql_fn(u32);
-static inline bool u64_eql primitive_eql_fn(u64);
-static inline bool isize_eql primitive_eql_fn(isize);
-static inline bool i8_eql primitive_eql_fn(i8);
-static inline bool i16_eql primitive_eql_fn(i16);
-static inline bool i32_eql primitive_eql_fn(i32);
-static inline bool i64_eql primitive_eql_fn(i64);
-static inline bool f32_eql primitive_eql_fn(f32);
-static inline bool f64_eql primitive_eql_fn(f64);
-static inline bool char_eql primitive_eql_fn(char);
 
 #endif // WEED_BUILTINS_H
