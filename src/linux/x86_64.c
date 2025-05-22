@@ -4,6 +4,10 @@
 
 #include <weed/linux/syscall.h>
 
+#ifndef __x86_64__
+#error "Expected x86_64 architecture"
+#endif
+
 static inline usize syscall0(usize nr) {
 	usize rt;
 	asm volatile ("syscall"
