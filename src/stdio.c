@@ -70,20 +70,8 @@ reader_t file_reader(const file_t* file) {
 #ifdef WEED_DEV
 
 void weed() {
-	usize written = 0;
-	written += write_all(stdout, as(opaque, "hi!\n"));
-	written += write_all(stdout, as(opaque, "hey!"));
-	let cnl = '\n';
-	var nl = (opaque){ &cnl, 1 };
-	if (written) {
-		// write_all(stdout, nl);
-		// syscall_write(1, nl);
-		nl.len = written / 2;
-	}
-	if (nl.len) {
-		syscall_write(1, nl);
-		write_all(stdout, as(opaque, "bye!\n"));
-	}
+	write_all(stdout, as(opaque, "hi!\n"));
+	write(char, stdout, '\n');
 	syscall_exit(0);
 }
 
