@@ -56,6 +56,15 @@ typedef double f64;
 		default: (__else) \
 	)
 
+#define goto_if(__rtcond, __label) \
+	if (__rtcond) goto __label
+
+#define is_signed(__T) \
+	_Generic(*(__T*)0, \
+		i8: true, i16: true, i32: true, i64: true, \
+		default: false \
+	)
+
 #define array_len(__value) \
 	(sizeof(__value) / sizeof(__value[0]))
 
@@ -112,6 +121,8 @@ typedef double f64;
 
 #define var __auto_type
 #define let const __auto_type
+#define bitsizeof(__type) \
+	(sizeof(__type) * 8)
 
 #define unconst(__t) \
 	(typeof(({var __s = *(__t); &__s;})))(__t)
