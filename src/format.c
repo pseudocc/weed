@@ -34,22 +34,22 @@ char digits2[100][2] = {
 		var v = abs_value; \
 		char buffer[bits]; \
 		register char* c = &buffer[bits]; \
+		char* d; \
 		goto_if(options.base != 10, base_other); \
- \
 	base_10: \
 		if ((loop = v >= 100)) { \
 			rem = v % 100; \
 			v /= 100; \
 			goto base_10_write2; \
-		} else if (v >= 10) { \
-			goto base_10_write2; \
+		} else if (v < 10) { \
+			d = digits2[v] + 1; \
+			goto base_10_write1; \
 		} \
-	base_10_write1: \
-		*(--c) = '0' + v; \
-		goto sign; \
 	base_10_write2: \
-		*(--c) = digits2[rem][1]; \
-		*(--c) = digits2[rem][0]; \
+		d = digits2[rem]; \
+		*(--c) = d[1]; \
+	base_10_write1: \
+		*(--c) = d[0]; \
 		goto_if(loop, base_10); \
 		goto sign; \
 	base_other: \
@@ -66,7 +66,7 @@ char digits2[100][2] = {
 			.ptr = c, \
 			.len = &buffer[bits] - c, \
 		}); \
-	} \
+	}
 
 FORMAT_INTEGER(u64)
 FORMAT_INTEGER(u32)
