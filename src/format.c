@@ -78,23 +78,40 @@ FORMAT_INTEGER(i32)
 FORMAT_INTEGER(i16)
 FORMAT_INTEGER(i8)
 
+usize format_bool(writer_t writer, bool value) {
+	string text = value ? string_true : string_false;
+	return write_all(writer, to(opaque, text));
+}
+
+const string string_true = as(string, "true");
+const string string_false = as(string, "false");
+
 #ifdef WEED_DEV
 
 #include <weed/stdio.h>
 #include <weed/linux/syscall.h>
 
-#define TEST(__T, __value, __base) \
+#define TEST_INT(__T, __value, __base) \
 	do {\
 		write_all(stdout, as(opaque, #__T" " #__value"(" #__base"): ")); \
 		format_##__T(stdout, __value, (format_integer_t){ __base, false }); \
 		write(char, stdout, '\n'); \
 	} while (0)
 
-void weed() {
-	TEST(u8, 0x7f, 10);
-	TEST(i32, -123456789, 10);
-	TEST(u32, 0xdeadbeef, 16);
+#define TEST_BOOL(__value) \
+	do {\
+		write_all(stdout, as(opaque, "bool(" #__value "): ")); \
+		format_bool(stdout, __value); \
+		write(char, stdout, '\n'); \
+	} while (0)
 
+void weed() {
+	TEST_INT(u8, 0x7f, 10);
+	TEST_INT(i32, -123456789, 10);
+	TEST_INT(u32, 0xdeadbeef, 16);
+
+	TEST_BOOL(true);
+	TEST_BOOL(false);
 	syscall_exit(0);
 }
 
